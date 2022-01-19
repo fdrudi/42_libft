@@ -6,73 +6,68 @@
 /*   By: fdrudi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/18 18:40:28 by fdrudi            #+#    #+#             */
-/*   Updated: 2022/01/18 18:40:32 by fdrudi           ###   ########.fr       */
+/*   Updated: 2022/01/19 19:21:22 by fdrudi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static int	nb_words(const char *s, char c)
+int	nb_words(const char *s, char c)
 {
 	int	i;
-	int	start;
-	int	wc;
+	int	j;
 
-	wc = 0;
 	i = 0;
-	start = 0;
-	while (1)
+	j = 0;
+	while (*s != '\0')
 	{
-		if (s[i] == c || s[i] == '\0')
+		if ((*s != c) && (j == 0))
 		{
-			if ((i - start - 1) > 0)
-				wc++;
-			start = i;
+			j = 1;
+			i++;
 		}
-		if (s[i] == '\0')
-			break ;
-		i++;
+		if (*s == c)
+			j = 0;
+		s++;
 	}
-	return (wc);
+	return (i);
 }
 
-static int	nb_split(int *cnt, const char *s, char *c, char **dest)
+static char	**wds_assign(const char *s, char c, char **dest, size_t len)
 {
-	while (1)
+	size_t	i;
+	size_t	x;
+	int		j;
+
+	i = 0;
+	x = 0;
+	j = -1;
+	while (i <= len)
 	{
-		if (s[cnt[0]] == *c || s[cnt[0]] == '\0')
+		if (s[i] != c && j < 0)
+			j = i;
+		else if ((s[i] == c || i == len) && j >= 0)
 		{
-			if ((cnt[0] - cnt[1]) > 0)
-			{
-				dest[cnt[2]] = ft_substr(s, cnt[1], cnt[0] - cnt[1]);
-				if (dest[cnt[2]] == NULL)
-					return (0);
-				cnt[2]++;
-			}
-			cnt[1] = cnt[0] + 1;
+			dest[x++] = ft_substr(s, j, (i - j));
+			j = -1;
 		}
-		if (s[cnt[0]] == '\0')
-			break ;
-		cnt[0]++;
+		i++;
 	}
-	return (1);
+	dest[x] = 0;
+	return (dest);
 }
 
 char	**ft_split(const char *s, char c)
 {
-	int		counters[3];
 	char	**dest;
+	size_t	len;
 
-	if (s == NULL)
+	if (!s)
 		return (NULL);
-	dest = (char **) malloc((nb_words(s, c) + 1) * sizeof(char *));
+	len = (ft_strlen(s));
+	dest = (char **) malloc ((nb_words(s, c) + 1) * sizeof(char *));
 	if (!dest)
 		return (NULL);
-	counters[0] = 0;
-	counters[1] = 0;
-	counters[2] = 0;
-	if (!nb_split (counters, s, &c, dest))
-		return (NULL);
-	dest[counters[2]] = NULL;
+	wds_assign(s, c, dest, len);
 	return (dest);
 }
